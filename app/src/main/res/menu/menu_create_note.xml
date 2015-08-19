@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.jorizci.evernoteclient.activities.CreateNote">
+    <item android:id="@+id/accept"
+        android:title="@string/accept"
+        android:icon="@drawable/ic_accept"
+        app:showAsAction="always" />
+</menu>

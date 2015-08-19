@@ -1,5 +1,6 @@
 package com.jorizci.evernoteclient.activities;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,8 +8,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.evernote.client.android.EvernoteSession;
+import com.evernote.client.android.asyncclient.EvernoteCallback;
 import com.evernote.client.android.asyncclient.EvernoteSearchHelper;
 import com.evernote.edam.notestore.NoteFilter;
+import com.evernote.edam.type.User;
 import com.jorizci.evernoteclient.EvernoteClientApp;
 import com.jorizci.evernoteclient.R;
 
@@ -18,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d(EvernoteClientApp.APP_LOG_CODE, "Main activity - onCreate");
 
         final EvernoteSearchHelper.Search mSearch = new EvernoteSearchHelper.Search().setMaxNotes(20).setPageSize(10);
 
@@ -44,6 +49,17 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(EvernoteClientApp.APP_LOG_CODE, "Exception", e);
                 }
+                EvernoteSession.getInstance().getEvernoteClientFactory().getUserStoreClient().getUserAsync(new EvernoteCallback<User>() {
+                    @Override
+                    public void onSuccess(User result) {
+                        Log.d(EvernoteClientApp.APP_LOG_CODE, "Async desde fuera de un thread... "+result.getName());
+                    }
+
+                    @Override
+                    public void onException(Exception exception) {
+
+                    }
+                });
             }
         });
 
@@ -59,14 +75,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id){
+            case R.id.action_new_note:
+                startActivity(new Intent(this, CreateNote.class));
+                break;
         }
 
         return super.onOptionsItemSelected(item);

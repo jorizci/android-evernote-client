@@ -4,4 +4,12 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">EvernoteClient</string>
     <string name="message_logged_successfully" >Logged In Correctly</string>
+    <string name="add_note">Add Note</string>
+    <string name="title_activity_create_note">Create Note</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="accept">Accept</string>
+    <string name="placeholder_new_note_title">Title your note</string>
+    <string name="placeholder_note_text">Simply start typing...</string>
+    <string name="label_notebook">Notebook</string>
 </resources>
