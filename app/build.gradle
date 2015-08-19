@@ -10,6 +10,10 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+        buildConfigField "com.evernote.client.android.EvernoteSession.EvernoteService", "EVERNOTE_SERVICE", (project.hasProperty('EVERNOTE_SERVICE') ? "$EVERNOTE_SERVICE" : "")
+        buildConfigField "String", "EVERNOTE_DEVELOPER_TOKEN", (project.hasProperty('EVERNOTE_DEVELOPER_TOKEN') ? "\"$EVERNOTE_DEVELOPER_TOKEN\"" : "")
+        buildConfigField "String", "EVERNOTE_NOTE_STORE", (project.hasProperty('EVERNOTE_NOTE_STORE') ? "\"$EVERNOTE_NOTE_STORE\"" : "")
     }
     buildTypes {
         release {
@@ -22,4 +26,5 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:23.0.0'
+    compile 'com.evernote:android-sdk:2.0.0-RC3'
 }

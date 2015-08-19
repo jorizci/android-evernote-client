@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">EvernoteClient</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_main">EvernoteClient</string>
+    <string name="message_logged_successfully" >Logged In Correctly</string>
 </resources>
