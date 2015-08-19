@@ -25,3 +25,16 @@ proguard/
 
 # Log Files
 *.log
+
+#IntelliJ IDEA
+.idea
+*.iml
+classes
+*.ipr
+*.iws
+gen-external-apklibs
+
+# Others
+proguard-project.txt
+.DS_Store
+.tmp
