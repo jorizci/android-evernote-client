@@ -10,7 +10,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+        android:id="@+id/field_note_title"
         android:hint="@string/placeholder_new_note_title" />
 
     <TableLayout
@@ -45,7 +45,7 @@
     <EditText
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText2"
+        android:id="@+id/field_note_content"
         android:hint="@string/placeholder_note_text" />
 
 </LinearLayout>
