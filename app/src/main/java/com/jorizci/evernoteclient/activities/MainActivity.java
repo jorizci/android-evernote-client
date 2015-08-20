@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.evernote.client.android.EvernoteSession;
@@ -45,10 +47,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setContentView(R.layout.activity_main);
 
-        //Initialize adapter and asign to the listView.
+        //Initialize adapter and assign to the listView.
         noteRefAdapter = new NoteRefAdapter(this);
         ListView noteRefList = (ListView) findViewById(R.id.note_ref_list);
         noteRefList.setAdapter(noteRefAdapter);
+        noteRefList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                NoteRef noteRef = (NoteRef) ((NoteRefAdapter)parent.getAdapter()).getItem(position);
+                ReadNote.startActivity(MainActivity.this,noteRef);
+            }
+        });
 
         //Prepare note loader.
         getLoaderManager().initLoader(NOTE_LOADER, null, this).forceLoad();
