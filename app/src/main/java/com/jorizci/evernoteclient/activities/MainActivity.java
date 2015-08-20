@@ -1,70 +1,59 @@
 package com.jorizci.evernoteclient.activities;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 
 import com.evernote.client.android.EvernoteSession;
+import com.evernote.client.android.EvernoteUtil;
 import com.evernote.client.android.asyncclient.EvernoteCallback;
 import com.evernote.client.android.asyncclient.EvernoteSearchHelper;
+import com.evernote.client.android.type.NoteRef;
 import com.evernote.edam.notestore.NoteFilter;
+import com.evernote.edam.type.NoteSortOrder;
 import com.evernote.edam.type.User;
 import com.jorizci.evernoteclient.EvernoteClientApp;
 import com.jorizci.evernoteclient.R;
+import com.jorizci.evernoteclient.adapters.NoteRefAdapter;
+import com.jorizci.evernoteclient.tasks.GetAllNotes;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * Main activity retrieves all NoteRef and displays to the user a list with the title
+ * of its accessible notes.
+ *
+ */
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<NoteRef>> {
+
+    private static final int NOTE_LOADER = 0;
+
+    private NoteRefAdapter noteRefAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
         Log.d(EvernoteClientApp.APP_LOG_CODE, "Main activity - onCreate");
 
-        final EvernoteSearchHelper.Search mSearch = new EvernoteSearchHelper.Search().setMaxNotes(20).setPageSize(10);
+        setContentView(R.layout.activity_main);
 
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run() {
-                try {
-                    //AuthenticationResult result = EvernoteSession.getInstance().getEvernoteClientFactory().getUserStoreClient().authenticate("jorizci", "r4gn4r0k", BuildConfig.EVERNOTE_CONSUMER_KEY, BuildConfig.EVERNOTE_CONSUMER_SECRET, false);
-                    Log.d(EvernoteClientApp.APP_LOG_CODE, "Tests");
-                    Log.d(EvernoteClientApp.APP_LOG_CODE, "Username " + EvernoteSession.getInstance().getEvernoteClientFactory().getUserStoreClient().getUser().getUsername());
-                    Log.d(EvernoteClientApp.APP_LOG_CODE, "Name " + EvernoteSession.getInstance().getEvernoteClientFactory().getUserStoreClient().getUser().getName());
+        //Initialize adapter and asign to the listView.
+        noteRefAdapter = new NoteRefAdapter(this);
+        ListView noteRefList = (ListView) findViewById(R.id.note_ref_list);
+        noteRefList.setAdapter(noteRefAdapter);
 
-                    Log.d(EvernoteClientApp.APP_LOG_CODE, "Nose " + EvernoteSession.getInstance().getEvernoteClientFactory().getNoteStoreClient().findNoteCounts(new NoteFilter(), false).getNotebookCounts());
-
-
-                    try {
-                        EvernoteSearchHelper.Result searchResult = EvernoteSession.getInstance()
-                                .getEvernoteClientFactory()
-                                .getEvernoteSearchHelper().execute(mSearch);
-                        Log.d(EvernoteClientApp.APP_LOG_CODE, searchResult.getAllAsNoteRef()+"");
-                    } catch (Exception e) {
-                        Log.e(EvernoteClientApp.APP_LOG_CODE, "Exception", e);
-                    }
-                } catch (Exception e) {
-                    Log.e(EvernoteClientApp.APP_LOG_CODE, "Exception", e);
-                }
-                EvernoteSession.getInstance().getEvernoteClientFactory().getUserStoreClient().getUserAsync(new EvernoteCallback<User>() {
-                    @Override
-                    public void onSuccess(User result) {
-                        Log.d(EvernoteClientApp.APP_LOG_CODE, "Async desde fuera de un thread... "+result.getName());
-                    }
-
-                    @Override
-                    public void onException(Exception exception) {
-
-                    }
-                });
-            }
-        });
-
-        thread.start();
+        //Prepare note loader.
+        getLoaderManager().initLoader(NOTE_LOADER, null, this).forceLoad();
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -84,5 +73,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<List<NoteRef>> onCreateLoader(int id, Bundle args) {
+        switch (id){
+            case NOTE_LOADER:
+                return new GetAllNotes(this);
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<NoteRef>> loader, List<NoteRef> data) {
+        //Set note references on adapter.
+        noteRefAdapter.setNoteRefs(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<NoteRef>> loader) {
+        //Clean note references
+        noteRefAdapter.setNoteRefs(new ArrayList<NoteRef>());
     }
 }
