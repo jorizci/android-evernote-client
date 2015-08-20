@@ -10,17 +10,25 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebView;
+import android.widget.TextView;
 
+import com.evernote.client.android.EvernoteSession;
+import com.evernote.client.android.EvernoteUtil;
+import com.evernote.client.android.asyncclient.EvernoteHtmlHelper;
 import com.evernote.client.android.type.NoteRef;
 import com.evernote.edam.type.Note;
 import com.jorizci.evernoteclient.EvernoteClientApp;
 import com.jorizci.evernoteclient.R;
 import com.jorizci.evernoteclient.tasks.GetNote;
 
+import org.scribe.builder.api.EvernoteApi;
+
 public class ReadNote extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Note> {
 
     private static final String NOTE_ID = "note_guid";
     private static final int NOTE_LOADER = 0;
+    private static final String HTML_MIME = "text/html";
     private String noteGuid = null;
 
     @Override
@@ -59,12 +67,31 @@ public class ReadNote extends AppCompatActivity implements LoaderManager.LoaderC
     }
 
     @Override
-    public void onLoadFinished(Loader<Note> loader, Note data) {
+    public void onLoadFinished(Loader<Note> loader, final Note data) {
         Log.d(EvernoteClientApp.APP_LOG_CODE, "Note: "+data.getTitle()+" "+data.getContent());
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //Set title
+                TextView noteTitle = (TextView) findViewById(R.id.note_title_text);
+                noteTitle.setText(data.getTitle());
+
+                //Remove XML headers and pass to webview.
+                String content = new String(data.getContent());
+                int startIndex = content.indexOf("<en-note>");
+                if(startIndex!=-1){
+                    content = content.substring(startIndex+9,
+                            content.length()-EvernoteUtil.NOTE_SUFFIX.length());
+                }
+
+                WebView webView = (WebView) findViewById(R.id.note_content_webview);
+                webView.loadData(content, HTML_MIME, null);
+            }
+        });
     }
 
     @Override
     public void onLoaderReset(Loader<Note> loader) {
-
+        //Do nothing
     }
 }
