@@ -14,6 +14,9 @@ this application are:
 Currently the application is being developed with developer token. This means that at this moment the application can only communicate and apply changes only to the specific account that is linked to that token.
 
 ##Currently implemented funcionality
+  - List user created notes
+  - Order user created notes
+  - View user created notes
   - Create new notes
 
 # Configuration
