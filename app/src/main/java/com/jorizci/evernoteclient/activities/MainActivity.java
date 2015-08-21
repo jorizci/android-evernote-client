@@ -12,17 +12,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.evernote.client.android.EvernoteSession;
-import com.evernote.client.android.EvernoteUtil;
-import com.evernote.client.android.asyncclient.EvernoteCallback;
-import com.evernote.client.android.asyncclient.EvernoteSearchHelper;
 import com.evernote.client.android.type.NoteRef;
-import com.evernote.edam.notestore.NoteFilter;
-import com.evernote.edam.type.NoteSortOrder;
-import com.evernote.edam.type.User;
+import com.evernote.edam.notestore.NoteMetadata;
 import com.jorizci.evernoteclient.EvernoteClientApp;
 import com.jorizci.evernoteclient.R;
-import com.jorizci.evernoteclient.adapters.NoteRefAdapter;
+import com.jorizci.evernoteclient.adapters.NoteMetadataAdapter;
 import com.jorizci.evernoteclient.tasks.GetAllNotes;
 
 import java.util.ArrayList;
@@ -34,11 +28,11 @@ import java.util.List;
  * of its accessible notes.
  *
  */
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<NoteRef>> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<NoteMetadata>> {
 
     private static final int NOTE_LOADER = 0;
 
-    private NoteRefAdapter noteRefAdapter;
+    private NoteMetadataAdapter noteMetadataAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +42,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
 
         //Initialize adapter and assign to the listView.
-        noteRefAdapter = new NoteRefAdapter(this);
+        noteMetadataAdapter = new NoteMetadataAdapter(this);
         ListView noteRefList = (ListView) findViewById(R.id.note_ref_list);
-        noteRefList.setAdapter(noteRefAdapter);
+        noteRefList.setAdapter(noteMetadataAdapter);
         noteRefList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                NoteRef noteRef = (NoteRef) ((NoteRefAdapter)parent.getAdapter()).getItem(position);
-                ReadNote.startActivity(MainActivity.this,noteRef);
+                NoteMetadata noteMetadata = (NoteMetadata) ((NoteMetadataAdapter)parent.getAdapter()).getItem(position);
+                ReadNote.startActivity(MainActivity.this,noteMetadata);
             }
         });
 
@@ -78,14 +72,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         switch (id){
             case R.id.action_new_note:
                 startActivity(new Intent(this, CreateNote.class));
-                break;
+                return true;
+            case R.id.alphabetically:
+                noteMetadataAdapter.orderAlphabetically();
+                return true;
+            case R.id.creation:
+                noteMetadataAdapter.orderCreation();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public Loader<List<NoteRef>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<NoteMetadata>> onCreateLoader(int id, Bundle args) {
         switch (id){
             case NOTE_LOADER:
                 return new GetAllNotes(this);
@@ -94,14 +94,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
     @Override
-    public void onLoadFinished(Loader<List<NoteRef>> loader, List<NoteRef> data) {
+    public void onLoadFinished(Loader<List<NoteMetadata>> loader, List<NoteMetadata> data) {
         //Set note references on adapter.
-        noteRefAdapter.setNoteRefs(data);
+        noteMetadataAdapter.setData(data);
     }
 
     @Override
-    public void onLoaderReset(Loader<List<NoteRef>> loader) {
+    public void onLoaderReset(Loader<List<NoteMetadata>> loader) {
         //Clean note references
-        noteRefAdapter.setNoteRefs(new ArrayList<NoteRef>());
+        noteMetadataAdapter.setData(new ArrayList<NoteMetadata>());
     }
 }

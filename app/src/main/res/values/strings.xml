@@ -13,4 +13,7 @@
     <string name="placeholder_note_text">Simply start typing...</string>
     <string name="label_notebook">Notebook</string>
     <string name="title_activity_read_note">ReadNote</string>
+    <string name="alphabetically">Alphabetically</string>
+    <string name="creation">Creation</string>
+    <string name="organize">Organize</string>
 </resources>

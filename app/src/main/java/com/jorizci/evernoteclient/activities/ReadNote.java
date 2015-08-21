@@ -17,6 +17,7 @@ import com.evernote.client.android.EvernoteSession;
 import com.evernote.client.android.EvernoteUtil;
 import com.evernote.client.android.asyncclient.EvernoteHtmlHelper;
 import com.evernote.client.android.type.NoteRef;
+import com.evernote.edam.notestore.NoteMetadata;
 import com.evernote.edam.type.Note;
 import com.jorizci.evernoteclient.EvernoteClientApp;
 import com.jorizci.evernoteclient.R;
@@ -51,9 +52,9 @@ public class ReadNote extends AppCompatActivity implements LoaderManager.LoaderC
         return false;
     }
 
-    public static void startActivity(Context context, NoteRef noteRef) {
+    public static void startActivity(Context context, NoteMetadata noteMetadata) {
         Intent intent = new Intent(context, ReadNote.class);
-        intent.putExtra(NOTE_ID, noteRef.getGuid());
+        intent.putExtra(NOTE_ID, noteMetadata.getGuid());
         context.startActivity(intent);
     }
 

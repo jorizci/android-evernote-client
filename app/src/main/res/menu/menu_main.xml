@@ -6,6 +6,15 @@
         android:icon="@drawable/ic_add_note"
         android:title="@string/add_note"
         app:showAsAction="always"/>
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_organize"
+        android:icon="@drawable/sort"
+        android:title="@string/organize"
+        app:showAsAction="always">
+        <menu>
+            <item android:id="@+id/alphabetically"
+                android:title="@string/alphabetically" />
+            <item android:id="@+id/creation"
+                android:title="@string/creation" />
+        </menu>
+    </item>
 </menu>
