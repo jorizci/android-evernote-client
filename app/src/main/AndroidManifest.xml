@@ -40,6 +40,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.jorizci.evernoteclient.activities.MainActivity" />
         </activity>
+        <activity
+            android:name=".activities.CreateNoteOcr"
+            android:label="@string/title_activity_create_note_ocr" >
+        </activity>
     </application>
 
 </manifest>

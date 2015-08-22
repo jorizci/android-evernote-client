@@ -16,4 +16,5 @@
     <string name="alphabetically">Alphabetically</string>
     <string name="creation">Creation</string>
     <string name="organize">Organize</string>
+    <string name="title_activity_create_note_ocr">CreateNoteOcr</string>
 </resources>

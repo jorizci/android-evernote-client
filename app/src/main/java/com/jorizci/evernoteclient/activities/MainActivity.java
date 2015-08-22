@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         switch (id){
             case R.id.action_new_note:
-                startActivity(new Intent(this, CreateNote.class));
+                //startActivity(new Intent(this, CreateNote.class));
+                startActivity(new Intent(this, CreateNoteOcr.class));
                 return true;
             case R.id.alphabetically:
                 noteMetadataAdapter.orderAlphabetically();
