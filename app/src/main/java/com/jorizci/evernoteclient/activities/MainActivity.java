@@ -1,6 +1,7 @@
 package com.jorizci.evernoteclient.activities;
 
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -31,8 +32,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<NoteMetadata>> {
 
     private static final int NOTE_LOADER = 0;
+    private static final int NEW_NOTE_RESULT = 10;
 
     private NoteMetadataAdapter noteMetadataAdapter;
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setContentView(R.layout.activity_main);
 
+        initializeData();
+    }
+
+    private void initializeData() {
         //Initialize adapter and assign to the listView.
         noteMetadataAdapter = new NoteMetadataAdapter(this);
         ListView noteRefList = (ListView) findViewById(R.id.note_ref_list);
@@ -48,10 +55,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         noteRefList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                NoteMetadata noteMetadata = (NoteMetadata) ((NoteMetadataAdapter)parent.getAdapter()).getItem(position);
-                ReadNote.startActivity(MainActivity.this,noteMetadata);
+                NoteMetadata noteMetadata = (NoteMetadata) ((NoteMetadataAdapter) parent.getAdapter()).getItem(position);
+                ReadNote.startActivity(MainActivity.this, noteMetadata);
             }
         });
+
+        dialog = new ProgressDialog(MainActivity.this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMessage(getString(R.string.message_loading));
+        dialog.setIndeterminate(true);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.show();
 
         //Prepare note loader.
         getLoaderManager().initLoader(NOTE_LOADER, null, this).forceLoad();
@@ -71,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         switch (id){
             case R.id.action_new_note:
-                startActivity(new Intent(this, CreateNote.class));
+                //Start new note activity but expect a result.
+                startActivityForResult(new Intent(this, CreateNote.class), NEW_NOTE_RESULT);
                 return true;
             case R.id.action_new_note_ocr:
                 startActivity(new Intent(this, CreateNoteOcr.class));
@@ -100,11 +115,27 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoadFinished(Loader<List<NoteMetadata>> loader, List<NoteMetadata> data) {
         //Set note references on adapter.
         noteMetadataAdapter.setData(data);
+        dialog.hide();
     }
 
     @Override
     public void onLoaderReset(Loader<List<NoteMetadata>> loader) {
         //Clean note references
         noteMetadataAdapter.setData(new ArrayList<NoteMetadata>());
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == NEW_NOTE_RESULT) {
+            if (resultCode == RESULT_OK) {
+                //Retrieve again all the data from server
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        initializeData();
+                    }
+                });
+            }
+        }
     }
 }
