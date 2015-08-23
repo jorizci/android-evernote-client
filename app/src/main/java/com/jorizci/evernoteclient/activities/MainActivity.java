@@ -89,7 +89,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 startActivityForResult(new Intent(this, CreateNote.class), NEW_NOTE_RESULT);
                 return true;
             case R.id.action_new_note_ocr:
-                startActivity(new Intent(this, CreateNoteOcr.class));
+                //Start new note activity but expect a result.
+                startActivityForResult(new Intent(this, CreateNoteOcr.class), NEW_NOTE_RESULT);
                 return true;
             case R.id.alphabetically:
                 noteMetadataAdapter.orderAlphabetically();

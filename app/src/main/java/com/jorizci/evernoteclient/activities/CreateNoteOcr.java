@@ -1,11 +1,14 @@
 package com.jorizci.evernoteclient.activities;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -187,6 +190,7 @@ public class CreateNoteOcr extends AppCompatActivity implements EvernoteCallback
             tessBaseApi.setImage(drawBitmap);
             String text = tessBaseApi.getUTF8Text();
 
+            createNote(text);
 
             tessBaseApi.end();
         } catch (Exception e) {
@@ -199,6 +203,12 @@ public class CreateNoteOcr extends AppCompatActivity implements EvernoteCallback
         EditText fieldNoteTitle = (EditText) findViewById(R.id.field_note_title);
         Spinner fieldNotebookSpinner = (Spinner) findViewById(R.id.notebook_spinner);
 
+        //Check if title is empty and abort the process if it is.
+        if(fieldNoteTitle.getText().toString().isEmpty()){
+            showError(R.string.empty_title);
+            return;
+        }
+
         Note note = new Note();
         note.setTitle(fieldNoteTitle.getText().toString());
         note.setNotebookGuid(notebooks.get(fieldNotebookSpinner.getSelectedItemPosition()).getGuid());
@@ -208,6 +218,8 @@ public class CreateNoteOcr extends AppCompatActivity implements EvernoteCallback
             @Override
             public void onSuccess(Note result) {
                 Toast.makeText(getApplicationContext(), "Note Created", Toast.LENGTH_LONG).show();
+                Intent data = new Intent();
+                setResult(RESULT_OK);
                 NavUtils.navigateUpFromSameTask(CreateNoteOcr.this);
             }
 
@@ -299,6 +311,20 @@ public class CreateNoteOcr extends AppCompatActivity implements EvernoteCallback
     public void onSuccess(List<Notebook> result) {
         notebooks = result;
         setNoteCreatorUiContent();
+    }
+
+    private void showError(final @StringRes int title) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CreateNoteOcr.this);
+                alertBuilder.setMessage(title);
+                alertBuilder.setCancelable(true);
+
+                AlertDialog dialog = alertBuilder.create();
+                dialog.show();
+            }
+        });
     }
 
     @Override
