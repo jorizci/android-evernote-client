@@ -11,19 +11,23 @@ this application are:
   - Create new notes
 
 # Current state
-Currently the application is being developed with developer token. This means that at this moment the application can only communicate and apply changes only to the specific account that is linked to that token.
+Currently the aplication is completelly functional. There is a versios without ocr support (master branch) and one with OCR support with tesseract libraries included in the project (ocr-feature)
 
 ##Currently implemented funcionality
+  - Login as a standard user
   - List user created notes
   - Order user created notes
   - View user created notes
   - Create new notes
+  - Create new notes with supplied written text
 
 # Configuration
 Android project is configured to work in Android Studio through gradle builder.
 To compile correctly the user needs to define these variables on user gradle.properties
 or project.
 
-  - EVERNOTE_DEVELOPER_TOKEN= [appropiate developer token]
-  - EVERNOTE_NOTE_STORE= [appropiate note store url]
-  - EVERNOTE_SERVICE=com.evernote.client.android.EvernoteSession.EvernoteService.PRODUCTION
+  - EVERNOTE_CONSUMER_KEY=[VALID KEY]
+  - EVERNOTE_CONSUMER_SECRET=[VALID SECRET]
+  - EVERNOTE_SERVICE=com.evernote.client.android.EvernoteSession.EvernoteService.SANDBOX
+
+The valid key and valid secret are the api keys that have to be obtained from evernote developer webpage. The api key has to be created with the name of the application 'EvernoteClientApp'
