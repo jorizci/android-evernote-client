@@ -17,4 +17,6 @@
     <string name="creation">Creation</string>
     <string name="organize">Organize</string>
     <string name="title_activity_create_note_ocr">CreateNoteOcr</string>
+    <string name="clean">Clean</string>
+    <string name="add_note_ocr">Add Note OCR</string>
 </resources>

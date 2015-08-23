@@ -2,10 +2,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.jorizci.evernoteclient.activities.MainActivity">
-    <item android:id="@+id/action_new_note"
+    <item android:id="@+id/action_new"
         android:icon="@drawable/ic_add_note"
         android:title="@string/add_note"
-        app:showAsAction="always"/>
+        app:showAsAction="always">
+        <menu>
+        <item android:id="@+id/action_new_note"
+            android:title="@string/add_note" />
+        <item android:id="@+id/action_new_note_ocr"
+            android:title="@string/add_note_ocr" />
+        </menu>
+    </item>
     <item android:id="@+id/action_organize"
         android:icon="@drawable/sort"
         android:title="@string/organize"

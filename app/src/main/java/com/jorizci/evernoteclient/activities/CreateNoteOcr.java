@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
@@ -13,8 +14,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.evernote.client.android.EvernoteSession;
+import com.evernote.client.android.EvernoteUtil;
+import com.evernote.client.android.asyncclient.EvernoteCallback;
+import com.evernote.edam.type.Note;
+import com.evernote.edam.type.Notebook;
 import com.googlecode.tesseract.android.TessBaseAPI;
 import com.jorizci.evernoteclient.EvernoteClientApp;
 import com.jorizci.evernoteclient.R;
@@ -24,15 +34,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CreateNoteOcr extends AppCompatActivity {
+public class CreateNoteOcr extends AppCompatActivity implements EvernoteCallback<List<Notebook>>{
 
+    private List<Notebook> notebooks;
     private static final String TESSDATA_PATH = "tessdata";
     private Bitmap drawBitmap;
     private Canvas mCanvas;
     private Path mPath;
     private Paint DrawBitmapPaint;
-    RelativeLayout Rl;
+    RelativeLayout relativeLayout;
     CustomView view;
 
     @Override
@@ -40,8 +53,8 @@ public class CreateNoteOcr extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_note_ocr);
         view = new CustomView(this);
-        Rl = (RelativeLayout) findViewById(R.id.ocr_relative_layout);
-        Rl.addView(view);
+        relativeLayout = (RelativeLayout) findViewById(R.id.ocr_relative_layout);
+        relativeLayout.addView(view);
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setDither(true);
@@ -52,6 +65,7 @@ public class CreateNoteOcr extends AppCompatActivity {
         mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(20);
 
+        EvernoteSession.getInstance().getEvernoteClientFactory().getNoteStoreClient().listNotebooksAsync(this);
     }
 
     private Paint mPaint;
@@ -144,29 +158,87 @@ public class CreateNoteOcr extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.accept:
+                acceptAction();
+                return true;
+            case R.id.clean:
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        relativeLayout.removeView(view);
+                        view =  new CustomView(CreateNoteOcr.this);
+                        relativeLayout.addView(view);
+                    }
+                });
+                return true;
+        }
 
-        Log.d(EvernoteClientApp.APP_LOG_CODE, "try the ocr");
-        TessBaseAPI tessBaseApi = new TessBaseAPI();
+        return super.onOptionsItemSelected(item);
+    }
 
-        Log.d(EvernoteClientApp.APP_LOG_CODE, "check internal path " + getFilesDir().getPath());
+    private void acceptAction() {
+        checkInstallOfFiles();
 
+        try {
+            TessBaseAPI tessBaseApi = new TessBaseAPI();
+            boolean returns = tessBaseApi.init(getFilesDir().getPath(), "eng");
+            tessBaseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "!@#$%^&*()_+=-[]}{;:'|~`,./<>?");
+            tessBaseApi.setImage(drawBitmap);
+            String text = tessBaseApi.getUTF8Text();
+
+
+            tessBaseApi.end();
+        } catch (Exception e) {
+            Log.e(EvernoteClientApp.APP_LOG_CODE, e.getMessage(), e);
+        }
+
+    }
+
+    private void createNote(String noteContent) {
+        EditText fieldNoteTitle = (EditText) findViewById(R.id.field_note_title);
+        Spinner fieldNotebookSpinner = (Spinner) findViewById(R.id.notebook_spinner);
+
+        Note note = new Note();
+        note.setTitle(fieldNoteTitle.getText().toString());
+        note.setNotebookGuid(notebooks.get(fieldNotebookSpinner.getSelectedItemPosition()).getGuid());
+        note.setContent(EvernoteUtil.NOTE_PREFIX + noteContent + EvernoteUtil.NOTE_SUFFIX);
+
+        EvernoteSession.getInstance().getEvernoteClientFactory().getNoteStoreClient().createNoteAsync(note, new EvernoteCallback<Note>() {
+            @Override
+            public void onSuccess(Note result) {
+                Toast.makeText(getApplicationContext(), "Note Created", Toast.LENGTH_LONG).show();
+                NavUtils.navigateUpFromSameTask(CreateNoteOcr.this);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                Log.e(EvernoteClientApp.APP_LOG_CODE, "Exception creating note ", exception);
+                Toast.makeText(getApplicationContext(), "Unexpected error", Toast.LENGTH_LONG).show();
+                NavUtils.navigateUpFromSameTask(CreateNoteOcr.this);
+            }
+        });
+    }
+
+    /**
+     * Tesseract needs the training files to be deployed on an accessible
+     * path, so we copy all asset files to the private storage of the app
+     * in the device.
+     */
+    private void checkInstallOfFiles() {
         //Check path in internal data
         File tessDataPath = new File(getFilesDir(), TESSDATA_PATH);
-        Log.d(EvernoteClientApp.APP_LOG_CODE, "Install in... " + tessDataPath.getPath());
         if (!tessDataPath.exists()) {
             //Create path
             tessDataPath.mkdir();
 
-            //Need to install files
-            Log.d(EvernoteClientApp.APP_LOG_CODE, "Install files");
+            //Need to install files (requisite to tesseract)
             InputStream input = null;
             OutputStream output = null;
             try {
                 for (String fileName : getAssets().list(TESSDATA_PATH)) {
-                    Log.d(EvernoteClientApp.APP_LOG_CODE, "Install file " + fileName);
                     input = getAssets().open(TESSDATA_PATH + File.separator + fileName);
                     File outputFile = new File(tessDataPath, fileName);
-                    Log.d(EvernoteClientApp.APP_LOG_CODE, "Install in... " + fileName);
                     output = new FileOutputStream(outputFile);
 
                     //Buffered copy.
@@ -196,59 +268,41 @@ public class CreateNoteOcr extends AppCompatActivity {
                 }
             }
         }
+    }
 
-        Log.d(EvernoteClientApp.APP_LOG_CODE, "Check files dir ");
-        for (File file : getFilesDir().listFiles()) {
-            Log.d(EvernoteClientApp.APP_LOG_CODE, file.getPath() + " " + file.getName());
+    private void setNoteCreatorUiContent() {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //Notebook initialization
+                List<String> list = generateNotebookNameList();
+                Log.d(EvernoteClientApp.APP_LOG_CODE, "Notebooks available " + list);
+                ArrayAdapter<String> notebookAdapter = new ArrayAdapter<String>(CreateNoteOcr.this, android.R.layout.simple_spinner_item, list);
+                notebookAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                Spinner notebookSpinner = (Spinner) findViewById(R.id.notebook_spinner);
+                notebookSpinner.setAdapter(notebookAdapter);
+                notebookSpinner.setSelection(0);
+            }
+        });
+    }
+
+    private List<String> generateNotebookNameList() {
+        List<String> notebookNames = new ArrayList<>();
+        for (Notebook notebook : notebooks) {
+            notebookNames.add(notebook.getName());
         }
+        return notebookNames;
+    }
 
-        try {
-            boolean returns = tessBaseApi.init(getFilesDir().getPath(), "eng");
-            Log.d(EvernoteClientApp.APP_LOG_CODE, "initialization? " + returns);
+    @Override
+    public void onSuccess(List<Notebook> result) {
+        notebooks = result;
+        setNoteCreatorUiContent();
+    }
 
-            tessBaseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, "!@#$%^&*()_+=-[]}{;:'\"\\|~`,./<>?");
-            tessBaseApi.setImage(drawBitmap);
-            String text = tessBaseApi.getUTF8Text();
-
-            Log.d(EvernoteClientApp.APP_LOG_CODE, "Got data: " + text);
-            tessBaseApi.end();
-        } catch (Exception e) {
-            Log.e(EvernoteClientApp.APP_LOG_CODE, e.getMessage(), e);
-        }
-
-
-       /* mPaint.setXfermode(null);
-        switch (item.getItemId()) {
-            case R.id.erase:
-                mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-                break;
-            case R.id.DELETE:
-                View =  new CustomView(this);
-                break;
-            case R.id.draw:
-                mPaint.setXfermode(null);
-
-                break;
-            case R.id.Save:
-                String pattern = "mm ss";
-                SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-                String time = formatter.format(new Date());
-                String path = ("/d-codepages" + time + ".png");
-
-                File file = new File(Environment.getExternalStorageDirectory()
-                        + path);
-
-                try {
-                    DrawBitmap.compress(Bitmap.CompressFormat.PNG, 100,
-                            new FileOutputStream(file));
-                    Toast.makeText(this, "File Saved ::" + path, Toast.LENGTH_SHORT)
-                            .show();
-                } catch (Exception e) {
-                    Toast.makeText(this, "ERROR" + e.toString(), Toast.LENGTH_SHORT)
-                            .show();
-                }
-
-        }*/
-        return super.onOptionsItemSelected(item);
+    @Override
+    public void onException(Exception exception) {
+        NavUtils.navigateUpFromSameTask(this);
     }
 }
