@@ -16,4 +16,6 @@
     <string name="alphabetically">Alphabetically</string>
     <string name="creation">Creation</string>
     <string name="organize">Organize</string>
+    <string name="message_loading">\"Loading. Please wait...\"</string>
+    <string name="empty_title">Can\'t create a note with empty title.</string>
 </resources>

@@ -35,7 +35,6 @@ public class ReadNote extends AppCompatActivity implements LoaderManager.LoaderC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_read_note);
 
         if(getIntent().getStringExtra(NOTE_ID)==null || getIntent().getStringExtra(NOTE_ID).isEmpty()){
             //This activity should have a correct note id or should return to main activity.
@@ -69,10 +68,11 @@ public class ReadNote extends AppCompatActivity implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<Note> loader, final Note data) {
-        Log.d(EvernoteClientApp.APP_LOG_CODE, "Note: "+data.getTitle()+" "+data.getContent());
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                setContentView(R.layout.activity_read_note);
+
                 //Set title
                 TextView noteTitle = (TextView) findViewById(R.id.note_title_text);
                 noteTitle.setText(data.getTitle());

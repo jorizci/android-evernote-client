@@ -1,6 +1,9 @@
 package com.jorizci.evernoteclient.activities;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,6 +28,7 @@ import java.util.List;
 public class CreateNote extends AppCompatActivity implements EvernoteCallback<List<Notebook>> {
 
     private List<Notebook> notebooks;
+    private MenuItem acceptButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +41,11 @@ public class CreateNote extends AppCompatActivity implements EvernoteCallback<Li
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_create_note, menu);
+
+        //Disable create new note by default until elements have been loaded.
+        acceptButton = menu.findItem(R.id.accept);
+        acceptButton.setEnabled(false);
+
         return true;
     }
 
@@ -58,6 +67,12 @@ public class CreateNote extends AppCompatActivity implements EvernoteCallback<Li
         EditText fieldNoteContent = (EditText) findViewById(R.id.field_note_content);
         Spinner fieldNotebookSpinner = (Spinner) findViewById(R.id.notebook_spinner);
 
+        //Check if title is empty and abort the process if it is.
+        if(fieldNoteTitle.getText().toString().isEmpty()){
+            showError(R.string.empty_title);
+            return;
+        }
+
         Note note = new Note();
         note.setTitle(fieldNoteTitle.getText().toString());
         note.setNotebookGuid(notebooks.get(fieldNotebookSpinner.getSelectedItemPosition()).getGuid());
@@ -67,6 +82,9 @@ public class CreateNote extends AppCompatActivity implements EvernoteCallback<Li
             @Override
             public void onSuccess(Note result) {
                 Toast.makeText(getApplicationContext(), "Note Created", Toast.LENGTH_LONG).show();
+
+                Intent data = new Intent();
+                setResult(RESULT_OK);
                 NavUtils.navigateUpFromSameTask(CreateNote.this);
             }
 
@@ -75,6 +93,20 @@ public class CreateNote extends AppCompatActivity implements EvernoteCallback<Li
                 Log.e(EvernoteClientApp.APP_LOG_CODE, "Exception creating note ", exception);
                 Toast.makeText(getApplicationContext(), "Unexpected error", Toast.LENGTH_LONG).show();
                 NavUtils.navigateUpFromSameTask(CreateNote.this);
+            }
+        });
+    }
+
+    private void showError(final @StringRes int title) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(CreateNote.this);
+                alertBuilder.setMessage(title);
+                alertBuilder.setCancelable(true);
+
+                AlertDialog dialog = alertBuilder.create();
+                dialog.show();
             }
         });
     }
@@ -101,6 +133,9 @@ public class CreateNote extends AppCompatActivity implements EvernoteCallback<Li
                 Spinner notebookSpinner = (Spinner) findViewById(R.id.notebook_spinner);
                 notebookSpinner.setAdapter(notebookAdapter);
                 notebookSpinner.setSelection(0);
+
+                //Enable create new note.
+                acceptButton.setEnabled(true);
             }
         });
     }
