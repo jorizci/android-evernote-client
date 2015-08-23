@@ -26,7 +26,8 @@ public class EvernoteClientApp extends Application {
         //API Service calls. User login will be postponed as it doesn't seem to work
         //in the base example of the sdk right now.
         evernoteBuilder.setEvernoteService(BuildConfig.EVERNOTE_SERVICE)
-                .buildForSingleUser(BuildConfig.EVERNOTE_DEVELOPER_TOKEN, BuildConfig.EVERNOTE_NOTE_STORE)
+                .setForceAuthenticationInThirdPartyApp(true)
+                .build(BuildConfig.EVERNOTE_CONSUMER_KEY, BuildConfig.EVERNOTE_CONSUMER_SECRET)
                 .asSingleton();
         registerActivityLifecycleCallbacks(new EvernoteClientLifecycle());
     }

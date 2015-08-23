@@ -14,6 +14,8 @@ android {
         buildConfigField "com.evernote.client.android.EvernoteSession.EvernoteService", "EVERNOTE_SERVICE", (project.hasProperty('EVERNOTE_SERVICE') ? "$EVERNOTE_SERVICE" : "")
         buildConfigField "String", "EVERNOTE_DEVELOPER_TOKEN", (project.hasProperty('EVERNOTE_DEVELOPER_TOKEN') ? "\"$EVERNOTE_DEVELOPER_TOKEN\"" : "")
         buildConfigField "String", "EVERNOTE_NOTE_STORE", (project.hasProperty('EVERNOTE_NOTE_STORE') ? "\"$EVERNOTE_NOTE_STORE\"" : "")
+        buildConfigField "String", "EVERNOTE_CONSUMER_KEY", (project.hasProperty('EVERNOTE_CONSUMER_KEY') ? "\"$EVERNOTE_CONSUMER_KEY\"" : "")
+        buildConfigField "String", "EVERNOTE_CONSUMER_SECRET", (project.hasProperty('EVERNOTE_CONSUMER_SECRET') ? "\"$EVERNOTE_CONSUMER_SECRET\"" : "")
     }
     buildTypes {
         release {
